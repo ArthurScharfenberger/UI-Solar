@@ -37,7 +37,9 @@ type NovoClienteForm = {
   status: ClienteStatus;
 };
 
-// estados -> cidades (pode trocar depois por API do IBGE, etc.)
+type ModalMode = "create" | "edit";
+
+// estados -> cidades (mock – depois dá pra trocar por API do IBGE)
 const ESTADOS_CIDADES: Record<string, string[]> = {
   RS: ["Canoas", "Porto Alegre", "Novo Hamburgo", "São Leopoldo", "Gravataí"],
   SC: ["Florianópolis", "Joinville", "Blumenau"],
@@ -118,6 +120,13 @@ function formatDateToPtBr(isoDate: string) {
   return `${day}/${month}/${year}`;
 }
 
+function formatDatePtBrToIso(pt: string) {
+  if (!pt || pt === "-") return "";
+  const [day, month, year] = pt.split("/");
+  if (!day || !month || !year) return "";
+  return `${year}-${month}-${day}`;
+}
+
 // máscara de telefone BR (xx) xxxxx-xxxx
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11); // até 11 dígitos
@@ -194,8 +203,11 @@ export default function ClientesPage() {
   const [origemFilter, setOrigemFilter] = useState<string>("todas");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
 
-  // Modal novo cliente
-  const [isNovoClienteOpen, setIsNovoClienteOpen] = useState(false);
+  // Modal (criar/editar)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>("create");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [novoCliente, setNovoCliente] = useState<NovoClienteForm>({
     nome: "",
     telefone: "",
@@ -218,9 +230,7 @@ export default function ClientesPage() {
   const cidadesUnicas = useMemo(
     () =>
       Array.from(
-        new Set(
-          clientes.map((c) => `${c.cidade} - ${c.estado}`)
-        )
+        new Set(clientes.map((c) => `${c.cidade} - ${c.estado}`))
       ).sort(),
     [clientes]
   );
@@ -309,6 +319,8 @@ export default function ClientesPage() {
   }
 
   function abrirModalNovoCliente() {
+    setModalMode("create");
+    setEditingId(null);
     setErroForm("");
     setSucessoForm("");
     setDataUltima("");
@@ -326,10 +338,45 @@ export default function ClientesPage() {
       origem: "WhatsApp",
       status: "Ativo",
     });
-    setIsNovoClienteOpen(true);
+    setIsModalOpen(true);
   }
 
-  function handleCriarCliente(e: FormEvent<HTMLFormElement>) {
+  function abrirModalEditarCliente(cliente: Cliente) {
+    setModalMode("edit");
+    setEditingId(cliente.id);
+    setErroForm("");
+    setSucessoForm("");
+
+    setNovoCliente({
+      nome: cliente.nome,
+      telefone: cliente.telefone,
+      estado: cliente.estado,
+      cidade: cliente.cidade,
+      rua: cliente.rua,
+      numero: cliente.numero,
+      bairro: cliente.bairro,
+      cep: cliente.cep,
+      potenciaKwp: cliente.potenciaKwp.toString().replace(".", ","),
+      origem: cliente.origem,
+      status: cliente.status,
+    });
+
+    setDataUltima(formatDatePtBrToIso(cliente.ultimaLimpeza));
+    setDataProxima(formatDatePtBrToIso(cliente.proximaRevisao));
+
+    setIsModalOpen(true);
+  }
+
+  function handleExcluirCliente(clienteId: string) {
+    const ok = window.confirm(
+      "Tem certeza que deseja excluir este cliente? Essa ação não pode ser desfeita."
+    );
+    if (!ok) return;
+
+    setClientes((prev) => prev.filter((c) => c.id !== clienteId));
+  }
+
+  function handleSalvarCliente(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErroForm("");
     setSucessoForm("");
@@ -355,8 +402,11 @@ export default function ClientesPage() {
       return;
     }
 
+    const id =
+      modalMode === "edit" && editingId ? editingId : `c-${Date.now()}`;
+
     const clienteNovo: Cliente = {
-      id: `c-${Date.now()}`,
+      id,
       nome: novoCliente.nome.trim(),
       telefone: novoCliente.telefone.trim(),
       estado: novoCliente.estado,
@@ -372,10 +422,22 @@ export default function ClientesPage() {
       status: novoCliente.status,
     };
 
-    setClientes((prev) => [clienteNovo, ...prev]);
-    setSucessoForm("Cliente cadastrado com sucesso!");
+    if (modalMode === "create") {
+      setClientes((prev) => [clienteNovo, ...prev]);
+    } else {
+      setClientes((prev) =>
+        prev.map((c) => (c.id === id ? clienteNovo : c))
+      );
+    }
+
+    setSucessoForm(
+      modalMode === "create"
+        ? "Cliente cadastrado com sucesso!"
+        : "Cliente atualizado com sucesso!"
+    );
+
     setTimeout(() => {
-      setIsNovoClienteOpen(false);
+      setIsModalOpen(false);
     }, 600);
   }
 
@@ -501,7 +563,8 @@ export default function ClientesPage() {
                 <th className="py-2 pr-4">Origem</th>
                 <th className="py-2 pr-4">Última limpeza</th>
                 <th className="py-2 pr-4">Próxima revisão</th>
-                <th className="py-2">Status</th>
+                <th className="py-2 pr-4">Status</th>
+                <th className="py-2 pr-2 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -538,8 +601,26 @@ export default function ClientesPage() {
                   <td className="py-2 pr-4 text-xs text-slate-200">
                     {c.proximaRevisao}
                   </td>
-                  <td className="py-2">
+                  <td className="py-2 pr-4">
                     <StatusBadge status={c.status} />
+                  </td>
+                  <td className="py-2 pr-2 text-right">
+                    <div className="inline-flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => abrirModalEditarCliente(c)}
+                        className="rounded-md border border-slate-600 bg-slate-900/60 px-2 py-1 text-[11px] text-slate-200 hover:border-emerald-400 hover:bg-emerald-500/10 transition"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExcluirCliente(c.id)}
+                        className="rounded-md border border-red-500/70 bg-red-500/10 px-2 py-1 text-[11px] text-red-200 hover:bg-red-500/20 transition"
+                      >
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -547,7 +628,7 @@ export default function ClientesPage() {
               {clientesFiltrados.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="py-6 text-center text-xs text-slate-500"
                   >
                     Nenhum cliente encontrado com os filtros atuais.
@@ -559,29 +640,31 @@ export default function ClientesPage() {
         </div>
       </section>
 
-      {/* MODAL NOVO CLIENTE */}
-      {isNovoClienteOpen && (
+      {/* MODAL CRIAR / EDITAR CLIENTE */}
+      {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900/95 p-5 shadow-xl shadow-black/60">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-slate-50">
-                  Novo cliente
+                  {modalMode === "create" ? "Novo cliente" : "Editar cliente"}
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Cadastre um novo cliente para acompanhar as revisões.
+                  {modalMode === "create"
+                    ? "Cadastre um novo cliente para acompanhar as revisões."
+                    : "Atualize os dados do cliente selecionado."}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setIsNovoClienteOpen(false)}
+                onClick={() => setIsModalOpen(false)}
                 className="rounded-full border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-400 hover:bg-slate-800"
               >
                 Fechar
               </button>
             </div>
 
-            <form onSubmit={handleCriarCliente} className="space-y-3">
+            <form onSubmit={handleSalvarCliente} className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-xs font-medium text-slate-400">
@@ -833,7 +916,7 @@ export default function ClientesPage() {
               <div className="mt-3 flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsNovoClienteOpen(false)}
+                  onClick={() => setIsModalOpen(false)}
                   className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800"
                 >
                   Cancelar
@@ -842,7 +925,9 @@ export default function ClientesPage() {
                   type="submit"
                   className="rounded-lg border border-emerald-500 bg-emerald-500/90 px-3 py-1.5 text-xs font-medium text-emerald-950 hover:bg-emerald-400"
                 >
-                  Salvar cliente
+                  {modalMode === "create"
+                    ? "Salvar cliente"
+                    : "Salvar alterações"}
                 </button>
               </div>
             </form>
