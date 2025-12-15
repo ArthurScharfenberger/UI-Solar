@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Dashboard da automação de WhatsApp para limpeza de placas solares.",
   icons: {
-    icon: "/icon.ico",      // ← seu favicon correto
+    icon: "/icon.ico",
     shortcut: "/icon.ico",
     apple: "/icon.ico",
   },
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <div className="flex min-h-screen bg-slate-950">
           <Sidebar />
 
