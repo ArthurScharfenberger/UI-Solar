@@ -1,7 +1,170 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Modal from "../components/Modal";
+type FieldProps = {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ReactNode;
+};
+
+function Field({ label, value, icon }: FieldProps) {
+  return (
+    <div className="space-y-1">
+      <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+        {label}
+      </div>
+      <div className="flex min-h-[44px] items-center gap-2 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2">
+        {icon && (
+          <div className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 text-slate-200">
+            {icon}
+          </div>
+        )}
+        <div className="text-sm font-semibold text-slate-50">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function I({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <span className="h-4 w-4 text-slate-200">{children}</span>;
+}
+
+const IconUser = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M20 21a8 8 0 0 0-16 0"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  </I>
+);
+
+const IconPhone = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M7 4h4l1 5-2 1c1 3 3 5 6 6l1-2 5 1v4c0 1-1 2-2 2-9 0-16-7-16-16 0-1 1-2 2-2Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </I>
+);
+
+const IconCalendar = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M8 3v3M16 3v3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 7h16v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 11h16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  </I>
+);
+
+const IconClock = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M12 7v6l4 2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </I>
+);
+
+const IconMapPin = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M12 22s7-4.5 7-12a7 7 0 1 0-14 0c0 7.5 7 12 7 12Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  </I>
+);
+
+const IconSource = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 9h8M8 13h8M8 17h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  </I>
+);
+
+const IconStatus = (
+  <I>
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path
+        d="M6 19h12M8 17V7m8 10V7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 7h8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  </I>
+);
+
 
 type AppointmentStatus = "Agendado" | "Concluído" | "Pendente" | "Cancelado";
 
@@ -99,6 +262,34 @@ export default function AgendamentosPage() {
   const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
   const [modalLembreteAberto, setModalLembreteAberto] = useState(false);
   const [modalReagendarAberto, setModalReagendarAberto] = useState(false);
+
+
+const statusUI = (status: AppointmentStatus) => {
+  switch (status) {
+    case "Agendado":
+      return {
+        badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
+        dot: "bg-emerald-400",
+      };
+    case "Concluído":
+      return {
+        badge: "border-sky-400/30 bg-sky-500/10 text-sky-300",
+        dot: "bg-sky-400",
+      };
+    case "Pendente":
+      return {
+        badge: "border-amber-400/30 bg-amber-500/10 text-amber-300",
+        dot: "bg-amber-400",
+      };
+    case "Cancelado":
+    default:
+      return {
+        badge: "border-rose-400/30 bg-rose-500/10 text-rose-300",
+        dot: "bg-rose-400",
+      };
+  }
+};
+
   const [agendamentos, setAgendamentos] = useState<Appointment[]>(agendamentosMock);
 
   const emptyNovo: Omit<Appointment, "id"> = {
@@ -284,38 +475,66 @@ export default function AgendamentosPage() {
         title="Detalhes do agendamento"
         cancelLabel="Fechar"
       >
-        {selecionado && (
-          <div className="space-y-2 text-xs text-slate-300">
-            <p>
-              <span className="text-slate-500">Cliente: </span>
-              {selecionado.cliente}
-            </p>
-            <p>
-              <span className="text-slate-500">Telefone: </span>
-              {selecionado.telefone}
-            </p>
-            <p>
-              <span className="text-slate-500">Data e horário: </span>
-              {selecionado.data} às {selecionado.horario}
-            </p>
-            <p>
-              <span className="text-slate-500">Cidade: </span>
-              {selecionado.cidade}
-            </p>
-            <p>
-              <span className="text-slate-500">Origem: </span>
-              {selecionado.origem}
-            </p>
-            <p>
-              <span className="text-slate-500">Status atual: </span>
-              {selecionado.status}
-            </p>
-            <p className="pt-2 text-slate-400">
-              Aqui depois podemos exibir histórico de mensagens do WhatsApp
-              relacionadas a este agendamento.
-            </p>
-          </div>
-        )}
+
+{selecionado && (
+  <div className="space-y-5">
+    {/* Linha 1: Cliente + Status */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Field label="Cliente" value={selecionado.cliente} icon={IconUser} />
+      <Field
+        label="Status"
+        value={
+          <span
+            className={
+              "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold " +
+              statusUI(selecionado.status).badge
+            }
+          >
+            <span
+              className={
+                "h-1.5 w-1.5 rounded-full " +
+                statusUI(selecionado.status).dot
+              }
+            />
+            {selecionado.status}
+          </span>
+        }
+        icon={IconStatus}
+      />
+    </div>
+
+    {/* Linha 2: Data, Hora */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Field label="Data" value={selecionado.data} icon={IconCalendar} />
+      <Field label="Horário" value={selecionado.horario} icon={IconClock} />
+    </div>
+
+    {/* Linha 3: Telefone, Cidade */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Field label="Telefone" value={selecionado.telefone} icon={IconPhone} />
+      <Field label="Cidade" value={selecionado.cidade} icon={IconMapPin} />
+    </div>
+
+    {/* Linha 4: Origem */}
+    <div className="grid grid-cols-1 gap-4">
+      <Field label="Origem" value={selecionado.origem} icon={IconSource} />
+    </div>
+
+    {/* Histórico */}
+    <div className="space-y-2">
+      <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+        Histórico de mensagens
+      </div>
+      <div className="rounded-xl border border-dashed border-white/10 bg-slate-950/30 p-4 text-sm text-slate-300">
+        <div className="font-semibold text-slate-100">Em breve</div>
+        <p className="mt-1 text-sm text-slate-400">
+          Aqui depois podemos exibir o histórico de mensagens do WhatsApp relacionadas a este agendamento.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
       </Modal>
 
       {/* Modal lembrete WhatsApp */}
