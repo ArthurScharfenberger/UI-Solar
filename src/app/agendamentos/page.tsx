@@ -99,11 +99,41 @@ export default function AgendamentosPage() {
   const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
   const [modalLembreteAberto, setModalLembreteAberto] = useState(false);
   const [modalReagendarAberto, setModalReagendarAberto] = useState(false);
+  const [agendamentos, setAgendamentos] = useState<Appointment[]>(agendamentosMock);
+
+  const emptyNovo: Omit<Appointment, "id"> = {
+    cliente: "",
+    telefone: "",
+    data: "",
+    horario: "",
+    cidade: "",
+    origem: "WhatsApp",
+    status: "Pendente",
+  };
+
+  const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
+  const [modalNovoAberto, setModalNovoAberto] = useState(false);
+
+  function abrirNovoAgendamento() {
+    setNovoForm(emptyNovo);
+    setModalNovoAberto(true);
+  }
+
+  function salvarNovoAgendamento() {
+    if (!novoForm.cliente.trim()) return;
+    const novo: Appointment = {
+      id: String(Date.now()),
+      ...novoForm,
+    };
+    setAgendamentos((prev) => [novo, ...prev]);
+    setModalNovoAberto(false);
+  }
+
 
   const agendamentosFiltrados =
     statusFiltro === "Todos"
-      ? agendamentosMock
-      : agendamentosMock.filter((a) => a.status === statusFiltro);
+      ? agendamentos
+      : agendamentos.filter((a) => a.status === statusFiltro);
 
   function abrirDetalhes(a: Appointment) {
     setSelecionado(a);
@@ -159,7 +189,18 @@ export default function AgendamentosPage() {
                 </button>
               )
             )}
-          </div>
+          
+            <button
+              onClick={abrirNovoAgendamento}
+              className="ml-1 inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-emerald-200 hover:bg-emerald-500/20 transition"
+              type="button"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+</svg>
+              Novo agendamento
+            </button>
+</div>
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm shadow-slate-950/40">
@@ -351,6 +392,96 @@ export default function AgendamentosPage() {
           </div>
         )}
       </Modal>
+
+      <Modal open={modalNovoAberto} title="Novo Agendamento" onClose={() => setModalNovoAberto(false)}>
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-slate-50">Novo agendamento</h3>
+          <p className="text-xs text-slate-400">Crie um agendamento rapidamente.</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Cliente</label>
+            <input
+              value={novoForm.cliente}
+              onChange={(e) => setNovoForm((p) => ({ ...p, cliente: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Telefone</label>
+            <input
+              value={novoForm.telefone}
+              onChange={(e) => setNovoForm((p) => ({ ...p, telefone: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              placeholder="(DDD) 99999-9999"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Data</label>
+            <input
+              type="date"
+              value={novoForm.data}
+              onChange={(e) => setNovoForm((p) => ({ ...p, data: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Horário</label>
+            <input
+              type="time"
+              value={novoForm.horario}
+              onChange={(e) => setNovoForm((p) => ({ ...p, horario: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Cidade</label>
+            <input
+              value={novoForm.cidade}
+              onChange={(e) => setNovoForm((p) => ({ ...p, cidade: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              placeholder="Ex: São Paulo"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-slate-400 text-xs">Origem</label>
+            <select
+              value={novoForm.origem}
+              onChange={(e) => setNovoForm((p) => ({ ...p, origem: e.target.value as Appointment["origem"] }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+            >
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Site">Site</option>
+              <option value="Indicação">Indicação</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            onClick={() => setModalNovoAberto(false)}
+            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={salvarNovoAgendamento}
+            className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-emerald-950 hover:bg-emerald-400"
+            type="button"
+          >
+            Salvar
+          </button>
+        </div>
+      </Modal>
+
     </>
   );
 }
