@@ -4,24 +4,20 @@
 type FiltersProps = {
   search: string;
   cidadeFilter: string;
-  origemFilter: string;
   statusFilter: string;
   cidadesUnicas: string[];
   onSearchChange: (value: string) => void;
   onCidadeFilterChange: (value: string) => void;
-  onOrigemFilterChange: (value: string) => void;
   onStatusFilterChange: (value: string) => void;
 };
 
 export function Filters({
   search,
   cidadeFilter,
-  origemFilter,
   statusFilter,
   cidadesUnicas,
   onSearchChange,
   onCidadeFilterChange,
-  onOrigemFilterChange,
   onStatusFilterChange,
 }: FiltersProps) {
   return (
@@ -60,25 +56,9 @@ export function Filters({
           </select>
         </div>
 
-        {/* Origem + status */}
+        {/* Status */}
         <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-400">
-              Origem
-            </label>
-            <select
-              value={origemFilter}
-              onChange={(e) => onOrigemFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400"
-            >
-              <option value="todas">Todas</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Site">Site</option>
-              <option value="Indicação">Indicação</option>
-            </select>
-          </div>
-
-          <div className="flex-1">
+<div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-slate-400">
               Status
             </label>

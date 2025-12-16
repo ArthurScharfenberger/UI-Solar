@@ -1,7 +1,7 @@
 // src/app/clientes/components/ClientsTable.tsx
 "use client";
 
-import { Cliente, ClienteStatus, ClienteOrigem } from "../types";
+import { Cliente, ClienteStatus } from "../types";
 
 type ClientsTableProps = {
   clientes: Cliente[];
@@ -30,33 +30,6 @@ function StatusBadge({ status }: { status: ClienteStatus }) {
   );
 }
 
-function OrigemBadge({ origem }: { origem: ClienteOrigem }) {
-  const base =
-    "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border";
-  if (origem === "WhatsApp") {
-    return (
-      <span
-        className={`${base} bg-emerald-500/10 text-emerald-300 border-emerald-500/40`}
-      >
-        WhatsApp
-      </span>
-    );
-  }
-  if (origem === "Site") {
-    return (
-      <span className={`${base} bg-sky-500/10 text-sky-300 border-sky-500/40`}>
-        Site
-      </span>
-    );
-  }
-  return (
-    <span
-      className={`${base} bg-yellow-500/10 text-yellow-300 border-yellow-500/40`}
-    >
-      Indicação
-    </span>
-  );
-}
 
 export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) {
   return (
@@ -75,7 +48,6 @@ export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) 
               <th className="py-2 pr-4">Contato</th>
               <th className="py-2 pr-4">Endereço</th>
               <th className="py-2 pr-4">Potência</th>
-              <th className="py-2 pr-4">Origem</th>
               <th className="py-2 pr-4">Última limpeza</th>
               <th className="py-2 pr-4">Próxima revisão</th>
               <th className="py-2 pr-4">Status</th>
@@ -106,9 +78,6 @@ export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) 
                 </td>
                 <td className="py-2 pr-4 text-xs text-slate-200">
                   {c.potenciaKwp.toFixed(1)} kWp
-                </td>
-                <td className="py-2 pr-4">
-                  <OrigemBadge origem={c.origem} />
                 </td>
                 <td className="py-2 pr-4 text-xs text-slate-200">
                   {c.ultimaLimpeza}

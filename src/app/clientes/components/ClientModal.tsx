@@ -3,7 +3,7 @@
 
 import { FormEvent } from "react";
 import { ESTADOS_CIDADES } from "../constants";
-import { ClienteOrigem, ClienteStatus, ModalMode, NovoClienteForm } from "../types";
+import { ClienteStatus, ModalMode, NovoClienteForm } from "../types";
 import { formatPhone } from "../utils";
 
 type ClientModalProps = {
@@ -234,26 +234,6 @@ export function ClientModal({
                 placeholder="Ex.: 5,2"
                 className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400"
               />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-400">
-                Origem
-              </label>
-              <select
-                value={novoCliente.origem}
-                onChange={(e) =>
-                  onChangeNovoCliente((prev) => ({
-                    ...prev,
-                    origem: e.target.value as ClienteOrigem,
-                  }))
-                }
-                className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400"
-              >
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Site">Site</option>
-                <option value="Indicação">Indicação</option>
-              </select>
             </div>
 
             <div>

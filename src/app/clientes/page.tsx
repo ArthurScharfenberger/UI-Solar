@@ -16,7 +16,6 @@ export default function ClientesPage() {
 
   const [search, setSearch] = useState("");
   const [cidadeFilter, setCidadeFilter] = useState<string>("todas");
-  const [origemFilter, setOrigemFilter] = useState<string>("todas");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
 
   // Modal (criar/editar)
@@ -34,7 +33,6 @@ export default function ClientesPage() {
     bairro: "",
     cep: "",
     potenciaKwp: "",
-    origem: "WhatsApp",
     status: "Ativo",
   });
   const [dataUltima, setDataUltima] = useState("");
@@ -59,12 +57,11 @@ export default function ClientesPage() {
         c.telefone.replace(/\D/g, "").includes(search.replace(/\D/g, ""));
 
       const matchCidade = cidadeFilter === "todas" || cidadeEstado === cidadeFilter;
-      const matchOrigem = origemFilter === "todas" || c.origem === origemFilter;
       const matchStatus = statusFilter === "todos" || c.status === statusFilter;
 
-      return matchNome && matchCidade && matchOrigem && matchStatus;
+      return matchNome && matchCidade && matchStatus;
     });
-  }, [clientes, search, cidadeFilter, origemFilter, statusFilter]);
+  }, [clientes, search, cidadeFilter, statusFilter]);
 
   // ====== HANDLERS ======
 
@@ -84,7 +81,6 @@ export default function ClientesPage() {
       "Bairro",
       "CEP",
       "Potência (kWp)",
-      "Origem",
       "Última limpeza",
       "Próxima revisão",
       "Status",
@@ -100,7 +96,6 @@ export default function ClientesPage() {
       c.bairro,
       c.cep,
       c.potenciaKwp.toString().replace(".", ","),
-      c.origem,
       c.ultimaLimpeza,
       c.proximaRevisao,
       c.status,
@@ -130,7 +125,6 @@ export default function ClientesPage() {
       bairro: "",
       cep: "",
       potenciaKwp: "",
-      origem: "WhatsApp",
       status: "Ativo",
     });
     setDataUltima("");
@@ -153,7 +147,6 @@ export default function ClientesPage() {
       bairro: cliente.bairro,
       cep: cliente.cep,
       potenciaKwp: String(cliente.potenciaKwp).replace(".", ","),
-      origem: cliente.origem,
       status: cliente.status,
     });
 
@@ -219,7 +212,6 @@ export default function ClientesPage() {
       bairro: novoCliente.bairro.trim(),
       cep: novoCliente.cep.trim(),
       potenciaKwp: potencia,
-      origem: novoCliente.origem,
       ultimaLimpeza: dataUltima ? formatDateToPtBr(dataUltima) : "-",
       proximaRevisao: dataProxima ? formatDateToPtBr(dataProxima) : "-",
       status: novoCliente.status,
@@ -273,14 +265,10 @@ export default function ClientesPage() {
 
       <Filters
         search={search}
-        cidadeFilter={cidadeFilter}
-        origemFilter={origemFilter}
-        statusFilter={statusFilter}
+        cidadeFilter={cidadeFilter}        statusFilter={statusFilter}
         cidadesUnicas={cidadesUnicas}
         onSearchChange={setSearch}
-        onCidadeFilterChange={setCidadeFilter}
-        onOrigemFilterChange={setOrigemFilter}
-        onStatusFilterChange={setStatusFilter}
+        onCidadeFilterChange={setCidadeFilter}        onStatusFilterChange={setStatusFilter}
       />
 
       <ClientsTable
