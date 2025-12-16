@@ -265,10 +265,12 @@ export default function ClientesPage() {
 
       <Filters
         search={search}
-        cidadeFilter={cidadeFilter}        statusFilter={statusFilter}
+        cidadeFilter={cidadeFilter}
+        statusFilter={statusFilter}
         cidadesUnicas={cidadesUnicas}
         onSearchChange={setSearch}
-        onCidadeFilterChange={setCidadeFilter}        onStatusFilterChange={setStatusFilter}
+        onCidadeFilterChange={setCidadeFilter}
+        onStatusFilterChange={setStatusFilter}
       />
 
       <ClientsTable

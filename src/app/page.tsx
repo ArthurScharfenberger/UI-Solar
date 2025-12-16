@@ -142,7 +142,6 @@ type Appointment = {
   id: string;
   cliente: string;
   cidade: string;
-  origem: "WhatsApp" | "Site" | "Indicação";
   data: string; // dd/mm/yyyy
   horario: string; // hh:mm
   status: AppointmentStatus;
@@ -172,10 +171,6 @@ const stats = [
 ];
 
 const appointmentsSeed: Appointment[] = [
-  { id: "a1", cliente: "Eduardo Lima", cidade: "São Paulo", origem: "WhatsApp", data: "15/12/2025", horario: "14:00", status: "Pendente" },
-  { id: "a2", cliente: "Fernanda Dias", cidade: "Campinas", origem: "Site", data: "15/12/2025", horario: "16:30", status: "Agendado" },
-  { id: "a3", cliente: "Pedro Rocha", cidade: "Santo André", origem: "Indicação", data: "16/12/2025", horario: "10:00", status: "Agendado" },
-  { id: "a4", cliente: "Condomínio Solar Vista", cidade: "Osasco", origem: "WhatsApp", data: "17/12/2025", horario: "09:00", status: "Cancelado" },
 ];
 
 const outboundSeed: OutboundMessage[] = [
@@ -331,7 +326,6 @@ export default function Dashboard() {
   const emptyForm = {
     cliente: "",
     cidade: "",
-    origem: "WhatsApp" as Appointment["origem"],
     data: "",
     horario: "",
   };
@@ -478,7 +472,6 @@ export default function Dashboard() {
     setForm({
       cliente: app.cliente,
       cidade: app.cidade,
-      origem: app.origem,
       data: app.data,
       horario: app.horario,
     });
@@ -509,7 +502,6 @@ export default function Dashboard() {
       id: `a${Date.now()}`,
       cliente: form.cliente.trim(),
       cidade: form.cidade.trim() || "-",
-      origem: form.origem,
       data: form.data,
       horario: form.horario,
       status: "Pendente",
@@ -538,7 +530,6 @@ export default function Dashboard() {
               ...a,
               cliente: form.cliente.trim(),
               cidade: form.cidade.trim() || "-",
-              origem: form.origem,
               data: form.data,
               horario: form.horario,
             }
@@ -710,8 +701,7 @@ export default function Dashboard() {
                     <th className="py-2 pr-4">Cliente</th>
                     <th className="py-2 pr-4">Data</th>
                     <th className="py-2 pr-4">Cidade</th>
-                    <th className="py-2 pr-4">Origem</th>
-                    <th className="py-2 pr-4">Status</th>
+                                        <th className="py-2 pr-4">Status</th>
                     <th className="py-2 text-right">Ações</th>
                   </tr>
                 </thead>
@@ -729,8 +719,7 @@ export default function Dashboard() {
                       </td>
                       <td className="py-3 pr-4 text-slate-200">{app.data}</td>
                       <td className="py-3 pr-4 text-slate-200">{app.cidade}</td>
-                      <td className="py-3 pr-4 text-slate-200">{app.origem}</td>
-                      <td className="py-3 pr-4">
+<td className="py-3 pr-4">
                         <StatusBadge status={app.status} />
                       </td>
 
@@ -893,17 +882,7 @@ export default function Dashboard() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-slate-400">Origem</label>
-            <select
-              value={form.origem}
-              onChange={(e) => setForm((p) => ({ ...p, origem: e.target.value as Appointment["origem"] }))}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-            >
-              <option>WhatsApp</option>
-              <option>Site</option>
-              <option>Indicação</option>
-            </select>
-          </div>
+</div>
           <div>
             <label className="mb-1 block text-slate-400">Data</label>
             <input
@@ -947,7 +926,7 @@ export default function Dashboard() {
         open={editarAgendamentoAberto}
         onClose={() => setEditarAgendamentoAberto(false)}
         title="Editar agendamento"
-        description="Atualize dados do cliente, data/horário e origem."
+        description="Atualize dados do cliente, data/horário."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -969,17 +948,7 @@ export default function Dashboard() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-slate-400">Origem</label>
-            <select
-              value={form.origem}
-              onChange={(e) => setForm((p) => ({ ...p, origem: e.target.value as Appointment["origem"] }))}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-            >
-              <option>WhatsApp</option>
-              <option>Site</option>
-              <option>Indicação</option>
-            </select>
-          </div>
+</div>
           <div>
             <label className="mb-1 block text-slate-400">Data</label>
             <input

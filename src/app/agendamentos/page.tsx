@@ -127,25 +127,6 @@ const IconMapPin = (
   </I>
 );
 
-const IconSource = (
-  <I>
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 9h8M8 13h8M8 17h5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  </I>
-);
-
 const IconStatus = (
   <I>
     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
@@ -175,7 +156,6 @@ type Appointment = {
   data: string;
   horario: string;
   cidade: string;
-  origem: "WhatsApp" | "Indicação" | "Site";
   status: AppointmentStatus;
 };
 
@@ -187,7 +167,6 @@ const agendamentosMock: Appointment[] = [
     data: "09/12/2025",
     horario: "14:00",
     cidade: "Canoas - RS",
-    origem: "WhatsApp",
     status: "Agendado",
   },
   {
@@ -197,7 +176,6 @@ const agendamentosMock: Appointment[] = [
     data: "10/12/2025",
     horario: "09:30",
     cidade: "Porto Alegre - RS",
-    origem: "Site",
     status: "Pendente",
   },
   {
@@ -207,7 +185,6 @@ const agendamentosMock: Appointment[] = [
     data: "10/12/2025",
     horario: "16:00",
     cidade: "Novo Hamburgo - RS",
-    origem: "Indicação",
     status: "Concluído",
   },
   {
@@ -217,7 +194,6 @@ const agendamentosMock: Appointment[] = [
     data: "11/12/2025",
     horario: "11:00",
     cidade: "São Leopoldo - RS",
-    origem: "WhatsApp",
     status: "Agendado",
   },
 ];
@@ -298,7 +274,6 @@ const statusUI = (status: AppointmentStatus) => {
     data: "",
     horario: "",
     cidade: "",
-    origem: "WhatsApp",
     status: "Pendente",
   };
 
@@ -407,8 +382,7 @@ const statusUI = (status: AppointmentStatus) => {
                   <th className="py-2 pr-4">Cliente</th>
                   <th className="py-2 pr-4">Data</th>
                   <th className="py-2 pr-4">Cidade</th>
-                  <th className="py-2 pr-4">Origem</th>
-                  <th className="py-2 pr-4">Status</th>
+                                    <th className="py-2 pr-4">Status</th>
                   <th className="py-2 text-right">Ações</th>
                 </tr>
               </thead>
@@ -432,10 +406,7 @@ const statusUI = (status: AppointmentStatus) => {
                     <td className="py-2 pr-4 text-xs text-slate-300">
                       {a.cidade}
                     </td>
-                    <td className="py-2 pr-4 text-xs text-slate-400">
-                      {a.origem}
-                    </td>
-                    <td className="py-2 pr-4">
+<td className="py-2 pr-4">
                       <StatusBadge status={a.status} />
                     </td>
                     <td className="py-2 text-right text-xs">
@@ -514,12 +485,6 @@ const statusUI = (status: AppointmentStatus) => {
       <Field label="Telefone" value={selecionado.telefone} icon={IconPhone} />
       <Field label="Cidade" value={selecionado.cidade} icon={IconMapPin} />
     </div>
-
-    {/* Linha 4: Origem */}
-    <div className="grid grid-cols-1 gap-4">
-      <Field label="Origem" value={selecionado.origem} icon={IconSource} />
-    </div>
-
     {/* Histórico */}
     <div className="space-y-2">
       <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
@@ -668,20 +633,7 @@ const statusUI = (status: AppointmentStatus) => {
               placeholder="Ex: São Paulo"
             />
           </div>
-
-          <div>
-            <label className="mb-1 block text-slate-400 text-xs">Origem</label>
-            <select
-              value={novoForm.origem}
-              onChange={(e) => setNovoForm((p) => ({ ...p, origem: e.target.value as Appointment["origem"] }))}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-            >
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Site">Site</option>
-              <option value="Indicação">Indicação</option>
-            </select>
-          </div>
-        </div>
+</div>
 
         <div className="mt-5 flex items-center justify-end gap-2">
           <button

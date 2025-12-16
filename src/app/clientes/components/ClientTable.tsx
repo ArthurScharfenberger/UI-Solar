@@ -48,7 +48,7 @@ export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) 
               <th className="py-2 pr-4">Contato</th>
               <th className="py-2 pr-4">Endereço</th>
               <th className="py-2 pr-4">Potência</th>
-              <th className="py-2 pr-4">Última limpeza</th>
+                            <th className="py-2 pr-4">Última limpeza</th>
               <th className="py-2 pr-4">Próxima revisão</th>
               <th className="py-2 pr-4">Status</th>
               <th className="py-2 pr-2 text-right">Ações</th>
@@ -79,7 +79,7 @@ export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) 
                 <td className="py-2 pr-4 text-xs text-slate-200">
                   {c.potenciaKwp.toFixed(1)} kWp
                 </td>
-                <td className="py-2 pr-4 text-xs text-slate-200">
+<td className="py-2 pr-4 text-xs text-slate-200">
                   {c.ultimaLimpeza}
                 </td>
                 <td className="py-2 pr-4 text-xs text-slate-200">
@@ -112,7 +112,7 @@ export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) 
             {clientes.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={8}
                   className="py-6 text-center text-xs text-slate-500"
                 >
                   Nenhum cliente encontrado com os filtros atuais.

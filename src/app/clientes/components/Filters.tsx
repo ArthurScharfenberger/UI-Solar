@@ -57,21 +57,19 @@ export function Filters({
         </div>
 
         {/* Status */}
-        <div className="flex gap-2">
-<div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-400">
-              Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => onStatusFilterChange(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400"
-            >
-              <option value="todos">Todos</option>
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
-          </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-400">
+            Status
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => onStatusFilterChange(e.target.value)}
+            className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400"
+          >
+            <option value="todos">Todos</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
         </div>
       </div>
     </section>
