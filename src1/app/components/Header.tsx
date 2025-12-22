@@ -1,7 +1,5 @@
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../components/format";
-
 import { usePathname } from "next/navigation";
 
 function getTitle(path: string) {

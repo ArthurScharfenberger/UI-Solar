@@ -1,13 +1,5 @@
 "use client";
 
-import ModalFooter from "../components/ModalFooter";
-
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../components/format";
-
-import { CLIENTES_INICIAIS } from "../clientes/constants";
-
-import { z } from "zod";
-
 import React, { useState } from "react";
 import Modal from "../components/Modal";
 type FieldProps = {
@@ -154,6 +146,7 @@ const IconStatus = (
   </I>
 );
 
+
 type AppointmentStatus = "Agendado" | "Concluído" | "Pendente" | "Cancelado";
 
 type Appointment = {
@@ -243,9 +236,9 @@ export default function AgendamentosPage() {
   );
   const [selecionado, setSelecionado] = useState<Appointment | null>(null);
   const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
-  const [showClienteSug, setShowClienteSug] = useState(false);
   const [modalLembreteAberto, setModalLembreteAberto] = useState(false);
   const [modalReagendarAberto, setModalReagendarAberto] = useState(false);
+
 
 const statusUI = (status: AppointmentStatus) => {
   switch (status) {
@@ -284,62 +277,7 @@ const statusUI = (status: AppointmentStatus) => {
     status: "Pendente",
   };
 
-  
-
-  // === Validação (Zod) ===
-  const novoSchema = z.object({
-    cliente: z.string().trim().min(1, "Informe o cliente."),
-    telefone: z.string().optional().transform((v) => (v ?? "").replace(/\D+/g, "")).refine((d) => d.length === 0 || d.length === 10 || d.length === 11, "Telefone inválido."),
-    cidade: z.string().optional(),
-    data: z
-      .string()
-      .trim()
-      .min(1, "Informe a data.")
-      .refine((s) => {
-        // aceita ISO (YYYY-MM-DD) do <input type="date"> e também DD/MM/AAAA (caso venha de dados antigos)
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-          const [yyyy, mm, dd] = s.split("-").map(Number);
-          const dt = new Date(yyyy, mm - 1, dd);
-          return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
-        }
-        if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-          const [dd, mm, yyyy] = s.split("/").map(Number);
-          const dt = new Date(yyyy, mm - 1, dd);
-          return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
-        }
-        return false;
-      }, "Data inválida."),
-    horario: z.string().regex(/^\d{2}:\d{2}$/, "Horário no formato HH:MM.").refine((h) => {
-      const [hh, mm] = h.split(":").map(Number);
-      return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
-    }, "Horário inválido."),
-  });
-  function validateNovo(f: Omit<Appointment, "id">) { return novoSchema.safeParse(f); }
-const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
-
-  type NovoField = keyof Omit<Appointment, "id">;
-  type NovoErrors = Partial<Record<NovoField, string>>;
-  const [novoErrors, setNovoErrors] = useState<NovoErrors>({});
-
-  function setErrorsFromResult(result: ReturnType<typeof validateNovo>) {
-    if (result.success) {
-      setNovoErrors({});
-      return;
-    }
-    const next: NovoErrors = {};
-    for (const issue of result.error.issues) {
-      const key = issue.path?.[0] as NovoField | undefined;
-      if (!key) continue;
-      if (!next[key]) next[key] = issue.message;
-    }
-    setNovoErrors(next);
-  }
-
-  function novoValidateField(field: NovoField, value: string) {
-    const nextForm = { ...novoForm, [field]: value } as Omit<Appointment, "id">;
-    setErrorsFromResult(validateNovo(nextForm));
-  }
-
+  const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
   const [modalNovoAberto, setModalNovoAberto] = useState(false);
 
   function abrirNovoAgendamento() {
@@ -348,12 +286,7 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
   }
 
   function salvarNovoAgendamento() {
-    const result = validateNovo(novoForm);
-    if (!result.success) {
-      setErrorsFromResult(result);
-      return;
-    }
-
+    if (!novoForm.cliente.trim()) return;
     const novo: Appointment = {
       id: String(Date.now()),
       ...novoForm,
@@ -361,6 +294,7 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
     setAgendamentos((prev) => [novo, ...prev]);
     setModalNovoAberto(false);
   }
+
 
   const agendamentosFiltrados =
     statusFiltro === "Todos"
@@ -635,9 +569,6 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
                 <label className="mb-1 block text-slate-400">Novo horário</label>
                 <input
                   type="time"
-                  step={300}
-                  min="00:00"
-                  max="23:59"
                   className="w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
                 />
               </div>
@@ -655,55 +586,22 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-slate-400 text-xs">Cliente</label>
-            
-
-<div className="relative">
-  <input
-    value={novoForm.cliente}
-    onChange={(e) => { setNovoForm((p) => ({ ...p, cliente: e.target.value })); novoValidateField("cliente", e.target.value); }}
-    onFocus={() => setShowClienteSug(true)}
-    onBlur={() => setTimeout(() => setShowClienteSug(false), 120)}
-    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-    placeholder="Digite para buscar cliente"
-  />
-{novoErrors.cliente && (
-              <p className="mt-1 text-[10px] text-red-400">{novoErrors.cliente}</p>
-            )}
-  {showClienteSug && (
-    <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-800 bg-slate-950 shadow-lg">
-      {CLIENTES_INICIAIS
-        .filter((c) => c.nome.toLowerCase().includes(novoForm.cliente.toLowerCase()))
-        .slice(0, 20)
-        .map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onMouseDown={() => setNovoForm((p) => ({ ...p, cliente: c.nome, cidade: c.cidade || p.cidade, telefone: formatPhoneBR(c.telefone || "") }))}
-            className="block w-full px-3 py-2 text-left text-xs hover:bg-slate-900"
-          >
-            {c.nome}{c.cidade ? ` • ${c.cidade}` : ""}
-          </button>
-        ))}
-      {CLIENTES_INICIAIS.filter((c) => c.nome.toLowerCase().includes(novoForm.cliente.toLowerCase())).length === 0 && (
-        <div className="px-3 py-2 text-xs text-slate-400">Nenhum cliente encontrado</div>
-      )}
-    </div>
-  )}
-</div>
-
+            <input
+              value={novoForm.cliente}
+              onChange={(e) => setNovoForm((p) => ({ ...p, cliente: e.target.value }))}
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              placeholder="Nome do cliente"
+            />
           </div>
 
           <div>
             <label className="mb-1 block text-slate-400 text-xs">Telefone</label>
             <input
               value={novoForm.telefone}
-              onChange={(e) => { const v = formatPhoneBR(e.target.value); setNovoForm((p) => ({ ...p, telefone: v })); novoValidateField("telefone", v); }}
+              onChange={(e) => setNovoForm((p) => ({ ...p, telefone: e.target.value }))}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
               placeholder="(DDD) 99999-9999"
             />
-{novoErrors.telefone && (
-              <p className="mt-1 text-[10px] text-red-400">{novoErrors.telefone}</p>
-            )}
           </div>
 
           <div>
@@ -711,12 +609,9 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
             <input
               type="date"
               value={novoForm.data}
-              onChange={(e) => { const v = e.target.value; setNovoForm((p) => ({ ...p, data: v })); novoValidateField("data", v); }}
+              onChange={(e) => setNovoForm((p) => ({ ...p, data: e.target.value }))}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
             />
-{novoErrors.data && (
-              <p className="mt-1 text-[10px] text-red-400">{novoErrors.data}</p>
-            )}
           </div>
 
           <div>
@@ -724,32 +619,39 @@ const [novoForm, setNovoForm] = useState<Omit<Appointment, "id">>(emptyNovo);
             <input
               type="time"
               value={novoForm.horario}
-              onChange={(e) => { const v = e.target.value; setNovoForm((p) => ({ ...p, horario: v })); novoValidateField("horario", v); }}
-              step={300}
-              min="00:00"
-              max="23:59"
+              onChange={(e) => setNovoForm((p) => ({ ...p, horario: e.target.value }))}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
             />
-{novoErrors.horario && (
-              <p className="mt-1 text-[10px] text-red-400">{novoErrors.horario}</p>
-            )}
           </div>
 
           <div>
             <label className="mb-1 block text-slate-400 text-xs">Cidade</label>
             <input
               value={novoForm.cidade}
-              onChange={(e) => { setNovoForm((p) => ({ ...p, cidade: e.target.value })); novoValidateField("cidade", e.target.value); }}
+              onChange={(e) => setNovoForm((p) => ({ ...p, cidade: e.target.value }))}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
               placeholder="Ex: São Paulo"
             />
-{novoErrors.cidade && (
-              <p className="mt-1 text-[10px] text-red-400">{novoErrors.cidade}</p>
-            )}
           </div>
 </div>
-        <ModalFooter onCancel={() => setModalNovoAberto(false)} onSave={salvarNovoAgendamento} />
-</Modal>
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            onClick={() => setModalNovoAberto(false)}
+            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={salvarNovoAgendamento}
+            className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-emerald-950 hover:bg-emerald-400"
+            type="button"
+          >
+            Salvar
+          </button>
+        </div>
+      </Modal>
 
     </>
   );

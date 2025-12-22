@@ -1,4 +1,3 @@
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../../components/format";
 import { ClienteStatus } from "../types";
 
 export function StatusBadge({ status }: { status: ClienteStatus }) {

@@ -1,0 +1,72 @@
+// src/app/clientes/constants.ts
+import { Cliente } from "./types";
+
+// estados -> cidades (mock – depois dá pra trocar por API do IBGE)
+export const ESTADOS_CIDADES: Record<string, string[]> = {
+  RS: ["Canoas", "Porto Alegre", "Novo Hamburgo", "São Leopoldo", "Gravataí"],
+  SC: ["Florianópolis", "Joinville", "Blumenau"],
+  PR: ["Curitiba", "Londrina", "Maringá"],
+};
+
+export const CLIENTES_INICIAIS: Cliente[] = [
+  {
+    id: "c1",
+    nome: "Carlos Silva",
+    telefone: "(51) 99999-1111",
+    estado: "RS",
+    cidade: "Canoas",
+    rua: "Rua das Flores",
+    numero: "123",
+    bairro: "Centro",
+    cep: "92000-000",
+    potenciaKwp: 5.2,
+    ultimaLimpeza: "05/06/2025",
+    proximaRevisao: "05/12/2025",
+    status: "Ativo",
+  },
+  {
+    id: "c2",
+    nome: "Mariana Souza",
+    telefone: "(51) 98888-2222",
+    estado: "RS",
+    cidade: "Porto Alegre",
+    rua: "Av. Ipiranga",
+    numero: "500",
+    bairro: "Jardim Botânico",
+    cep: "90160-000",
+    potenciaKwp: 7.8,
+    ultimaLimpeza: "18/04/2025",
+    proximaRevisao: "18/10/2025",
+    status: "Ativo",
+  },
+  {
+    id: "c3",
+    nome: "João Pereira",
+    telefone: "(51) 97777-3333",
+    estado: "RS",
+    cidade: "Novo Hamburgo",
+    rua: "Rua Bento Gonçalves",
+    numero: "45",
+    bairro: "Rio Branco",
+    cep: "93310-000",
+    potenciaKwp: 3.6,
+    ultimaLimpeza: "10/01/2025",
+    proximaRevisao: "10/07/2025",
+    status: "Inativo",
+  },
+  {
+    id: "c4",
+    nome: "Ana Costa",
+    telefone: "(51) 96666-4444",
+    estado: "RS",
+    cidade: "São Leopoldo",
+    rua: "Av. Independência",
+    numero: "800",
+    bairro: "Centro",
+    cep: "93010-000",
+    potenciaKwp: 4.3,
+    ultimaLimpeza: "22/08/2025",
+    proximaRevisao: "22/02/2026",
+    status: "Ativo",
+  },
+];

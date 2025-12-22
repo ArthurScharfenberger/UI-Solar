@@ -1,8 +1,6 @@
 // src/app/clientes/components/ClientsTable.tsx
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../../components/format";
-
 import { Cliente, ClienteStatus } from "../types";
 
 type ClientsTableProps = {
@@ -31,6 +29,7 @@ function StatusBadge({ status }: { status: ClienteStatus }) {
     </span>
   );
 }
+
 
 export function ClientsTable({ clientes, onEdit, onDelete }: ClientsTableProps) {
   return (

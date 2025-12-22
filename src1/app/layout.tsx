@@ -1,4 +1,3 @@
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "./components/format";
 import type { Metadata } from "next";
 import "./globals.css";
 

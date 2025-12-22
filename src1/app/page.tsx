@@ -1,13 +1,5 @@
 "use client";
 
-import ModalFooter from "./components/ModalFooter";
-
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "./components/format";
-
-import { CLIENTES_INICIAIS } from "./clientes/constants";
-
-import { z } from "zod";
-
 import Link from "next/link";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import Modal from "./components/Modal";
@@ -31,7 +23,6 @@ function Icon({
     | "check"
     | "x"
     | "pencil"
-    | "trash"
     | "external"
     | "clock";
   className?: string;
@@ -116,17 +107,6 @@ function Icon({
           <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
         </svg>
       );
-
-    case "trash":
-      return (
-        <svg {...common}>
-          <path d="M3 6h18" />
-          <path d="M8 6V4h8v2" />
-          <path d="M6 6l1 14h10l1-14" />
-          <path d="M10 11v6M14 11v6" />
-        </svg>
-      );
-
     case "external":
       return (
         <svg {...common}>
@@ -161,7 +141,6 @@ type AppointmentStatus = "Agendado" | "Concluído" | "Pendente" | "Cancelado";
 type Appointment = {
   id: string;
   cliente: string;
-  telefone?: string;
   cidade: string;
   data: string; // dd/mm/yyyy
   horario: string; // hh:mm
@@ -337,72 +316,20 @@ export default function Dashboard() {
   const [msgFiltro, setMsgFiltro] = useState<MsgFilter>("todas");
 
   const [novoAgendamentoAberto, setNovoAgendamentoAberto] = useState(false);
-  const [showClienteSug, setShowClienteSug] = useState(false);
   const [editarAgendamentoAberto, setEditarAgendamentoAberto] = useState(false);
 
   const [toast, setToast] = useState<string | null>(null);
 
-  
-
-  // === Validação (Zod) ===
-  const appointmentSchema = z.object({
-    cliente: z.string().trim().min(1, "Informe o cliente."),
-    telefone: z.string().optional().transform((v) => (v ?? "").replace(/\D+/g, "")).refine((d) => d.length === 0 || d.length === 10 || d.length === 11, "Telefone inválido."),
-    cidade: z.string().optional(),
-    data: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data no formato DD/MM/AAAA.").refine((s) => {
-      const [dd, mm, yyyy] = s.split("/").map(Number);
-      const dt = new Date(yyyy, mm - 1, dd);
-      return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
-    }, "Data inválida."),
-    horario: z.string().regex(/^\d{2}:\d{2}$/, "Horário no formato HH:MM.").refine((h) => {
-      const [hh, mm] = h.split(":").map(Number);
-      return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
-    }, "Horário inválido."),
-    status: z.any().optional(),
-  });
-
-  function validateFormForSave(f: typeof form) {
-    return appointmentSchema.safeParse({ ...f, status: "Pendente" });
-  }
-const [appointments, setAppointments] = useState<Appointment[]>(appointmentsSeed);
+  const [appointments, setAppointments] = useState<Appointment[]>(appointmentsSeed);
   const [outboundMessages, setOutboundMessages] = useState<OutboundMessage[]>(outboundSeed);
 
   const emptyForm = {
     cliente: "",
-        telefone: "",
-cidade: "",
+    cidade: "",
     data: "",
     horario: "",
   };
   const [form, setForm] = useState(emptyForm);
-  
-  const [errors, setErrors] = useState<{[k:string]: string}>({});
-
-  function validateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-    const candidate = { ...form, [key]: value } as typeof form;
-    const res = appointmentSchema.safeParse(candidate);
-    if (!res.success) {
-      const err = res.error.issues.find((e) => e.path[0] === key);
-      setErrors((p) => ({ ...p, [String(key)]: err?.message || "" }));
-    } else {
-      setErrors((p) => ({ ...p, [String(key)]: "" }));
-    }
-  }
-  function validateAll() {
-    const res = appointmentSchema.safeParse(form);
-    if (!res.success) {
-      const map: {[k:string]: string} = {};
-      for (const e of res.error.issues) {
-        map[String(e.path[0])] = e.message;
-      }
-      setErrors(map);
-      return false;
-    }
-    setErrors({});
-    return true;
-  }
-  const isFormValid = appointmentSchema.safeParse(form).success;
-
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const pendentesCount = appointments.filter((a) => a.status === "Pendente").length;
@@ -544,23 +471,14 @@ cidade: "",
     setEditingId(app.id);
     setForm({
       cliente: app.cliente,
-            telefone: app.telefone || "",
-cidade: app.cidade,
+      cidade: app.cidade,
       data: app.data,
       horario: app.horario,
     });
     setEditarAgendamentoAberto(true);
   };
 
-  
-  const deleteAppointment = (id: string) => {
-    if (window.confirm("Excluir este agendamento?")) {
-      setAppointments((prev) => prev.filter((a) => a.id !== id));
-      setToast("Agendamento excluído.");
-      window.setTimeout(() => setToast(null), 2000);
-    }
-  };
-const openWhatsApp = (cliente: string) => {
+  const openWhatsApp = (cliente: string) => {
     // Sem telefone ainda: abre WhatsApp Web e deixa uma dica para integração futura
     window.open("https://web.whatsapp.com/", "_blank", "noopener,noreferrer");
     setToast(`Abrindo WhatsApp para ${cliente}…`);
@@ -573,10 +491,9 @@ const openWhatsApp = (cliente: string) => {
     window.setTimeout(() => setToast(null), 2200);
   };
 
-  const saveNew = () => { if (!validateAll()) return;
-    const check = validateFormForSave(form);
-    if (!check.success) {
-      setToast(check.error.issues?.[0]?.message ?? "Dados inválidos.");
+  const saveNew = () => {
+    if (!form.cliente.trim() || !form.data.trim() || !form.horario.trim()) {
+      setToast("Preencha Cliente, Data e Horário.");
       window.setTimeout(() => setToast(null), 2200);
       return;
     }
@@ -599,12 +516,6 @@ const openWhatsApp = (cliente: string) => {
   };
 
   const saveEdit = () => {
-    const check = validateFormForSave(form);
-    if (!check.success) {
-      setToast(check.error.issues?.[0]?.message ?? "Dados inválidos.");
-      window.setTimeout(() => setToast(null), 2200);
-      return;
-    }
     if (!editingId) return;
     if (!form.cliente.trim() || !form.data.trim() || !form.horario.trim()) {
       setToast("Preencha Cliente, Data e Horário.");
@@ -774,11 +685,11 @@ const openWhatsApp = (cliente: string) => {
                     setEditingId(null);
                     setNovoAgendamentoAberto(true);
                   }}
-                  className="ml-1 inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-emerald-200 hover:bg-emerald-500/20 transition"
+                  className="ml-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-200 hover:bg-emerald-500/20 transition inline-flex items-center gap-2"
                   type="button"
                 >
                   <Icon name="plus" className="h-4 w-4" />
-                  Novo Agendamento
+                  Novo
                 </button>
               </div>
             </div>
@@ -825,13 +736,6 @@ const openWhatsApp = (cliente: string) => {
                             onClick={() => openEdit(app)}
                             icon={<Icon name="pencil" className="h-4 w-4" />}
                             variant="info"
-                          />
-                          
-                          <IconButton
-                            title="Excluir"
-                            onClick={() => deleteAppointment(app.id)}
-                            icon={<Icon name="trash" className="h-4 w-4" />}
-                            variant="danger"
                           />
                           {app.status === "Pendente" ? (
                             <IconButton
@@ -954,113 +858,68 @@ const openWhatsApp = (cliente: string) => {
       {/* Modal: Novo agendamento */}
       <Modal
         open={novoAgendamentoAberto}
-        onClose={() =>setNovoAgendamentoAberto(false)}
+        onClose={() => setNovoAgendamentoAberto(false)}
         title="Novo agendamento"
         description="Cadastre um novo serviço. Ele entra como Pendente para confirmação."
-      ><div className="mb-4">
-          <h3 className="text-sm font-semibold text-slate-50">Novo agendamento</h3>
-          <p className="text-xs text-slate-400">Crie um agendamento rapidamente.</p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      >
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Cliente</label>
-            
-
-<div className="relative">
-  <input
-    value={form.cliente}
-    onChange={(e) => { setForm((p) => ({ ...p, cliente: e.target.value })); validateField("cliente", e.target.value); }}
-    onFocus={() => setShowClienteSug(true)}
-    onBlur={() => setTimeout(() => setShowClienteSug(false), 120)}
-    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-    placeholder="Digite para buscar cliente"
-  />
-<p className="mt-1 text-[10px] text-red-400">{errors["cliente"]}</p>
-  {showClienteSug && (
-    <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-800 bg-slate-950 shadow-lg">
-      {CLIENTES_INICIAIS
-        .filter((c) => c.nome.toLowerCase().includes(form.cliente.toLowerCase()))
-        .slice(0, 20)
-        .map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onMouseDown={() => setForm((p) => ({ ...p, cliente: c.nome, cidade: c.cidade || p.cidade, telefone: formatPhoneBR(c.telefone || "") }))}
-            className="block w-full px-3 py-2 text-left text-xs hover:bg-slate-900"
-          >
-            {c.nome}{c.cidade ? ` • ${c.cidade}` : ""}
-          </button>
-        ))}
-      {CLIENTES_INICIAIS.filter((c) => c.nome.toLowerCase().includes(form.cliente.toLowerCase())).length === 0 && (
-        <div className="px-3 py-2 text-xs text-slate-400">Nenhum cliente encontrado</div>
-      )}
-    </div>
-  )}
-</div>
-
-          </div>
-          <div>
-            <label className="mb-1 block text-slate-400 text-xs">Telefone</label>
+            <label className="mb-1 block text-slate-400">Cliente</label>
             <input
-              value={form.telefone}
-              onChange={(e) => { const v = formatPhoneBR(e.target.value); setForm((p) => ({ ...p, telefone: v })); validateField("telefone", v); }}
+              value={form.cliente}
+              onChange={(e) => setForm((p) => ({ ...p, cliente: e.target.value }))}
+              placeholder="Nome do cliente"
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="(DDD) 99999-9999"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["telefone"]}</p>
           </div>
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Data</label>
-            <input
-              value={form.data}
-              onChange={(e) => { const v = formatDateBR(e.target.value); setForm((p) => ({ ...p, data: v })); validateField("data", v); }}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="dd/mm/aaaa"
-            />
-<p className="mt-1 text-[10px] text-red-400">{errors["data"]}</p>
-          </div>
-          <div>
-            <label className="mb-1 block text-slate-400 text-xs">Horário</label>
-            <input type="time"
-              value={form.horario}
-              onChange={(e) => { const v = e.target.value; setForm((p) => ({ ...p, horario: v })); validateField("horario", v); }}
-              step={300}
-              min="00:00"
-              max="23:59"
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="--:--"
-            />
-<p className="mt-1 text-[10px] text-red-400">{errors["horario"]}</p>
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-slate-400 text-xs">Cidade</label>
+            <label className="mb-1 block text-slate-400">Cidade</label>
             <input
               value={form.cidade}
-              onChange={(e) => { setForm((p) => ({ ...p, cidade: e.target.value })); validateField("cidade", e.target.value); }}
+              onChange={(e) => setForm((p) => ({ ...p, cidade: e.target.value }))}
+              placeholder="Ex.: São Paulo"
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="Ex: São Paulo"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["cidade"]}</p>
+          </div>
+          <div>
+</div>
+          <div>
+            <label className="mb-1 block text-slate-400">Data</label>
+            <input
+              value={form.data}
+              onChange={(e) => setForm((p) => ({ ...p, data: e.target.value }))}
+              placeholder="dd/mm/aaaa"
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-slate-400">Horário</label>
+            <input
+              value={form.horario}
+              onChange={(e) => setForm((p) => ({ ...p, horario: e.target.value }))}
+              placeholder="hh:mm"
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+            />
+          </div>
+
+          <div className="md:col-span-2 mt-2 flex items-center justify-end gap-2">
+            <button
+              onClick={() => setNovoAgendamentoAberto(false)}
+              className="rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-900/70 transition"
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={saveNew}
+              className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-200 hover:bg-emerald-500/20 transition"
+              type="button"
+            >
+              Salvar
+            </button>
           </div>
         </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            onClick={() => setNovoAgendamentoAberto(false)}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
-            type="button"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={saveNew}
-            className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-emerald-950 hover:bg-emerald-400"
-            type="button"
-          >
-            Salvar
-          </button>
-        </div>
-</Modal>
+      </Modal>
 
       {/* Modal: Editar agendamento */}
       <Modal
@@ -1069,84 +928,64 @@ const openWhatsApp = (cliente: string) => {
         title="Editar agendamento"
         description="Atualize dados do cliente, data/horário."
       >
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-slate-50">Editar agendamento</h3>
-          <p className="text-xs text-slate-400">Atualize dados do cliente, data/horário.</p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Cliente</label>
+            <label className="mb-1 block text-slate-400">Cliente</label>
             <input
               value={form.cliente}
-              onChange={(e) => { setForm((p) => ({ ...p, cliente: e.target.value })); validateField("cliente", e.target.value); }}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              onChange={(e) => setForm((p) => ({ ...p, cliente: e.target.value }))}
               placeholder="Nome do cliente"
-            />
-<p className="mt-1 text-[10px] text-red-400">{errors["cliente"]}</p>
-          </div>
-          <div>
-            <label className="mb-1 block text-slate-400 text-xs">Telefone</label>
-            <input
-              value={form.telefone}
-              onChange={(e) => { const v = formatPhoneBR(e.target.value); setForm((p) => ({ ...p, telefone: v })); validateField("telefone", v); }}
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="(DDD) 99999-9999"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["telefone"]}</p>
           </div>
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Cidade</label>
+            <label className="mb-1 block text-slate-400">Cidade</label>
             <input
               value={form.cidade}
-              onChange={(e) => { setForm((p) => ({ ...p, cidade: e.target.value })); validateField("cidade", e.target.value); }}
+              onChange={(e) => setForm((p) => ({ ...p, cidade: e.target.value }))}
+              placeholder="Ex.: Campinas"
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="Ex: São Paulo"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["cidade"]}</p>
           </div>
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Data</label>
+</div>
+          <div>
+            <label className="mb-1 block text-slate-400">Data</label>
             <input
               value={form.data}
-              onChange={(e) => { const v = formatDateBR(e.target.value); setForm((p) => ({ ...p, data: v })); validateField("data", v); }}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
+              onChange={(e) => setForm((p) => ({ ...p, data: e.target.value }))}
               placeholder="dd/mm/aaaa"
+              className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["data"]}</p>
           </div>
           <div>
-            <label className="mb-1 block text-slate-400 text-xs">Horário</label>
-            <input type="time"
+            <label className="mb-1 block text-slate-400">Horário</label>
+            <input
               value={form.horario}
-              onChange={(e) => { const v = e.target.value; setForm((p) => ({ ...p, horario: v })); validateField("horario", v); }}
-              step={300}
-              min="00:00"
-              max="23:59"
+              onChange={(e) => setForm((p) => ({ ...p, horario: e.target.value }))}
+              placeholder="hh:mm"
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-50 outline-none focus:border-emerald-400"
-              placeholder="--:--"
             />
-<p className="mt-1 text-[10px] text-red-400">{errors["horario"]}</p>
+          </div>
+
+          <div className="md:col-span-2 mt-2 flex items-center justify-end gap-2">
+            <button
+              onClick={() => setEditarAgendamentoAberto(false)}
+              className="rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-900/70 transition"
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={saveEdit}
+              className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-200 hover:bg-emerald-500/20 transition"
+              type="button"
+            >
+              Salvar
+            </button>
           </div>
         </div>
-
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            onClick={() => setEditarAgendamentoAberto(false)}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
-            type="button"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={saveEdit}
-            className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-medium text-emerald-950 hover:bg-emerald-400"
-            type="button"
-          >
-            Salvar
-          </button>
-        </div>
-</Modal>
+      </Modal>
     </>
   );
 }

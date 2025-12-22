@@ -1,8 +1,6 @@
 // src/app/clientes/page.tsx
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../components/format";
-
 import { FormEvent, useMemo, useState } from "react";
 
 import { ClientModal } from "./components/ClientModal";

@@ -1,8 +1,6 @@
 // src/app/clientes/components/ClientModal.tsx
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../../components/format";
-
 import { FormEvent } from "react";
 import { ESTADOS_CIDADES } from "../constants";
 import { ClienteStatus, ModalMode, NovoClienteForm } from "../types";
@@ -212,7 +210,7 @@ export function ClientModal({
                 onChange={(e) =>
                   onChangeNovoCliente((prev) => ({
                     ...prev,
-                    cep: formatCEP(e.target.value),
+                    cep: e.target.value,
                   }))
                 }
                 placeholder="00000-000"

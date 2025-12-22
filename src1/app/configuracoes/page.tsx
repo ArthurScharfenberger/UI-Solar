@@ -1,7 +1,5 @@
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../components/format";
-
 import { useState } from "react";
 import Modal from "../components/Modal";
 

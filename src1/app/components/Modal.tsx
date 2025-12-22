@@ -1,7 +1,5 @@
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../components/format";
-
 import { ReactNode, MouseEvent } from "react";
 
 type ModalProps = {
@@ -56,28 +54,27 @@ export default function Modal({
 
         <div className="space-y-3 text-sm text-slate-100">{children}</div>
 
-        {onConfirm && (
-          <div className="mt-5 flex justify-end gap-2 text-xs">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-slate-200 hover:bg-slate-800"
-            >
-              {cancelLabel}
-            </button>
+        <div className="mt-5 flex justify-end gap-2 text-xs">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-slate-200 hover:bg-slate-800"
+          >
+            {cancelLabel}
+          </button>
+          {onConfirm && (
             <button
               type="button"
               onClick={() => {
                 onConfirm();
                 onClose();
               }}
-              className="rounded-lg bg-emerald-500 px-3 py-1.5 font-semibold text-slate-950 hover:bg-emerald-400"
+              className="rounded-lg border border-emerald-500 bg-emerald-500/80 px-3 py-1.5 font-semibold text-slate-950 hover:bg-emerald-400"
             >
               {confirmLabel}
             </button>
-          </div>
-        )}
-
+          )}
+        </div>
       </div>
     </div>
   );

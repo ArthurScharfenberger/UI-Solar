@@ -1,8 +1,6 @@
 // src/app/clientes/components/Filters.tsx
 "use client";
 
-import { formatPhoneBR, formatCPF, formatCNPJ, formatCEP, formatDateBR } from "../../components/format";
-
 type FiltersProps = {
   search: string;
   cidadeFilter: string;
